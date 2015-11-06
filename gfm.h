@@ -1200,6 +1200,10 @@ public:
                         throw 1;
                     }
                     
+                    // Avoid SNPs in repetitive sequences
+                    // Otherwise, it will likely explode due to an exponential number of combinations
+                    const index_t seqlen = 16; assert_leq(seqlen, 16);
+                    map<uint64_t, uint64_t> ss_seq;
                     while(!snp_file.eof()) {
                         // rs73387790	single	22:20000001-21000000	145	A
                         string snp_id;
@@ -1281,10 +1285,55 @@ public:
                             }
                             snp.len = 1;
                             snp.seq = bp;
+                            if(pos >= seqlen && pos + seqlen <= s.length()) {
+                                uint64_t seq = 0;
+                                ASSERT_ONLY(size_t seq_count = 0);
+                                for(index_t si = pos - seqlen; si < pos; si++) {
+                                    seq = seq << 2 | s[si];
+                                    ASSERT_ONLY(seq_count++);
+                                }
+                                seq = seq << 2 | bp; ASSERT_ONLY(seq_count++);
+                                for(index_t si = pos + 1; si < pos + seqlen; si++) {
+                                    seq = seq << 2 | s[si];
+                                    ASSERT_ONLY(seq_count++);
+                                }
+                                assert_eq(seq_count, seqlen * 2);
+                                if(ss_seq.find(seq) == ss_seq.end()) {
+                                    ss_seq[seq] = _alts.size() - 1;
+                                } else {
+                                    if(ss_seq[seq] < _alts.size()) {
+                                        _alts[ss_seq[seq]].type = ALT_NONE;
+                                        ss_seq[seq] = std::numeric_limits<uint64_t>::max();
+                                    }
+                                    snp.type = ALT_NONE;
+                                }
+                            }
                         } else if(type == "deletion") {
                             snp.type = ALT_SNP_DEL;
                             snp.len = del_len;
                             snp.seq = 0;
+                            if(pos >= seqlen && pos + del_len + seqlen <= s.length()) {
+                                uint64_t seq = 0;
+                                ASSERT_ONLY(size_t seq_count = 0);
+                                for(index_t si = pos - seqlen; si < pos; si++) {
+                                    seq = seq << 2 | s[si];
+                                    ASSERT_ONLY(seq_count++);
+                                }
+                                for(index_t si = pos + del_len; si < pos + del_len + seqlen; si++) {
+                                    seq = seq << 2 | s[si];
+                                    ASSERT_ONLY(seq_count++);
+                                }
+                                assert_eq(seq_count, seqlen * 2);
+                                if(ss_seq.find(seq) == ss_seq.end()) {
+                                    ss_seq[seq] = _alts.size() - 1;
+                                } else {
+                                    if(ss_seq[seq] < _alts.size()) {
+                                        _alts[ss_seq[seq]].type = ALT_NONE;
+                                        ss_seq[seq] = std::numeric_limits<uint64_t>::max();
+                                    }
+                                    snp.type = ALT_NONE;
+                                }
+                            }
                         } else if(type == "insertion") {
                             snp.type = ALT_SNP_INS;
                             snp.len = ins_seq.size();
@@ -1308,6 +1357,31 @@ public:
                                 _alts.pop_back();
                                 break;
                             }
+                            if(pos >= seqlen && pos + seqlen <= s.length()) {
+                                uint64_t seq = 0;
+                                ASSERT_ONLY(size_t seq_count = 0);
+                                size_t iseqlen = seqlen - (snp.len >> 1);
+                                for(index_t si = pos - iseqlen; si < pos; si++) {
+                                    seq = seq << 2 | s[si];
+                                    ASSERT_ONLY(seq_count++);
+                                }
+                                seq = seq << (snp.len << 1) | snp.seq; ASSERT_ONLY(seq_count += snp.len);
+                                iseqlen = seqlen - ((snp.len + 1) >> 1);
+                                for(index_t si = pos; si < pos + iseqlen; si++) {
+                                    seq = seq << 2 | s[si];
+                                    ASSERT_ONLY(seq_count++);
+                                }
+                                assert_eq(seq_count, seqlen * 2);
+                                if(ss_seq.find(seq) == ss_seq.end()) {
+                                    ss_seq[seq] = _alts.size() - 1;
+                                } else {
+                                    if(ss_seq[seq] < _alts.size()) {
+                                        _alts[ss_seq[seq]].type = ALT_NONE;
+                                        ss_seq[seq] = std::numeric_limits<uint64_t>::max();
+                                    }
+                                    snp.type = ALT_NONE;
+                                }
+                            }
                         } else {
                             cerr << "Error: unknown snp type " << type << endl;
                             throw 1;
@@ -1317,6 +1391,31 @@ public:
                     }
                     snp_file.close();
                     assert_eq(_alts.size(), _altnames.size());
+                    
+                    uint64_t seq = 0;
+                    for(size_t i = 0; i < s.length(); i++) {
+                        seq = seq << 2 | s[i];
+                        if(i + 1 < seqlen * 2) continue;
+                        if(ss_seq.find(seq) == ss_seq.end()) continue;
+                        if(ss_seq[seq] < _alts.size()) {
+                            // daehwan - for debugging purposes
+                            // _alts[ss_seq[seq]].type = ALT_NONE;
+                            ss_seq[seq] = std::numeric_limits<uint64_t>::max();
+                        }
+                    }
+                    
+                    // daehwan - for debugging purposes
+#if 1
+                    index_t skip_count = 0;
+                    for(size_t i = 0; i < _alts.size(); i++) {
+                        const ALT<index_t>& alt = _alts[i];
+                        if(alt.type == ALT_NONE) {
+                            skip_count++;
+                        }
+                    }
+                    int kk = 0;
+                    kk += 20;
+#endif
                 }
                 
                 if(ssfile != "") {
@@ -1386,7 +1485,7 @@ public:
                         
                         // Avoid splice sites in repetitive sequences
                         // Otherwise, it will likely explode due to an exponential number of combinations
-                        index_t seqlen = 16; assert_leq(seqlen, 16);
+                        const index_t seqlen = 16; assert_leq(seqlen, 16);
                         if(left >= seqlen && right + 1 + seqlen <= s.length()) {
                             uint64_t seq = 0;
                             for(index_t si = left - seqlen; si < left; si++) {

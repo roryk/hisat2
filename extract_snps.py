@@ -129,13 +129,11 @@ def extract_snps(genome_file, snp_file, verbose = False, testset = False):
         if start >= len(chr_seq):
             continue
 
-        # daehwan - for debugging purposes
-        # """
         if len(snp_list) > 0:
             _, _, last_chr, last_start, _, _  = snp_list[-1]
+            # daehwan - for debugging purposes
             if chr == last_chr and abs(start - last_start) <= 20:
                 continue
-        # """
 
         observed = observed.upper()
         allele_list = observed.split("/")
