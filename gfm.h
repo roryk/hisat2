@@ -1405,7 +1405,7 @@ public:
                     }
                     
                     // daehwan - for debugging purposes
-#if 1
+#if 0
                     index_t skip_count = 0;
                     for(size_t i = 0; i < _alts.size(); i++) {
                         const ALT<index_t>& alt = _alts[i];
@@ -1413,8 +1413,6 @@ public:
                             skip_count++;
                         }
                     }
-                    int kk = 0;
-                    kk += 20;
 #endif
                 }
                 
@@ -1646,8 +1644,8 @@ public:
 #endif
                 }
                 
-                writeIndex<int32_t>(fout7, _alts.size(), this->toBe());
-                writeIndex<int32_t>(fout8, _alts.size(), this->toBe());
+                writeIndex<index_t>(fout7, _alts.size(), this->toBe());
+                writeIndex<index_t>(fout8, _alts.size(), this->toBe());
                 for(index_t i = 0; i < _alts.size(); i++) {
                     _alts[i].write(fout7, this->toBe());
                     fout8 << _altnames[i] << endl;

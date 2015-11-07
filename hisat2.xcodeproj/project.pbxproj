@@ -343,6 +343,20 @@
 			passBuildSettingsInEnvironment = 1;
 			productName = "sawhi-align-debug";
 		};
+		E808261B1BEE5B9400D9CF90 /* hisat2-align-l-debug */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "USE_SRA=1 NCBI_NGS_DIR=/Users/infphilo/work/devel/ngs-sdk.1.1.1-mac NCBI_VDB_DIR=/Users/infphilo/work/devel/ngs-sdk.1.1.1-mac hisat2-align-l-debug";
+			buildConfigurationList = E808261C1BEE5B9400D9CF90 /* Build configuration list for PBXLegacyTarget "hisat2-align-l-debug" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = /Users/infphilo/work/hisat2;
+			dependencies = (
+			);
+			name = "hisat2-align-l-debug";
+			passBuildSettingsInEnvironment = 1;
+			productName = "sawhi-align-debug";
+		};
 		E818AEAF19880CA400ED141B /* hisat-bp-bin-debug */ = {
 			isa = PBXLegacyTarget;
 			buildArgumentsString = "hisat-bp-bin-debug";
@@ -440,6 +454,7 @@
 				E854525E1B1A2E350049F2AC /* hisat2-inspect-s-debug */,
 				E85452621B1A2E400049F2AC /* hisat2-align-s-debug */,
 				E8562A641B53FBDE003062A4 /* hisat2-align-s */,
+				E808261B1BEE5B9400D9CF90 /* hisat2-align-l-debug */,
 			);
 		};
 /* End PBXProject section */
@@ -469,6 +484,38 @@
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = "hisat2-build-s-debug";
+			};
+			name = Release;
+		};
+		E808261D1BEE5B9400D9CF90 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUGGING_SYMBOLS = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				NCBI_NGS_DIR = "/usr/local/ngs/ngs-sdk";
+				NCBI_VDB_DIR = "/usr/local/ncbi/ncbi-vdb";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "hisat2-align-s-debug copy";
+			};
+			name = Debug;
+		};
+		E808261E1BEE5B9400D9CF90 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				NCBI_NGS_DIR = "/usr/local/ngs/ngs-sdk";
+				NCBI_VDB_DIR = "/usr/local/ncbi/ncbi-vdb";
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = "hisat2-align-s-debug copy";
 			};
 			name = Release;
 		};
@@ -689,6 +736,15 @@
 			buildConfigurations = (
 				E8000AE51AE9324600E1F351 /* Debug */,
 				E8000AE61AE9324600E1F351 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E808261C1BEE5B9400D9CF90 /* Build configuration list for PBXLegacyTarget "hisat2-align-l-debug" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E808261D1BEE5B9400D9CF90 /* Debug */,
+				E808261E1BEE5B9400D9CF90 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
